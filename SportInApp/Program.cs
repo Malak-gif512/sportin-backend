@@ -34,10 +34,20 @@ builder.Services.AddDbContext<SportInDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                            ?? Environment.GetEnvironmentVariable("DATABASE_URL"); // Backup from env
+
+    Console.WriteLine($"🚀 Using Connection String: {connectionString}");
+
     options.UseNpgsql(connectionString);
 });
 
 var app = builder.Build();
+
+// 🔥 Auto Migration Here 🔥
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<SportInDbContext>();
+    dbContext.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -56,11 +66,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
 app.UseCors("AllowAll");
 
 app.UseAuthorization();
-
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
