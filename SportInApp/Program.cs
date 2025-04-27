@@ -31,7 +31,11 @@ builder.Services.AddSwaggerGen(c =>
 
 // Add DbContext
 builder.Services.AddDbContext<SportInDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                           ?? Environment.GetEnvironmentVariable("DATABASE_URL"); // Backup from env
+    options.UseNpgsql(connectionString);
+});
 
 var app = builder.Build();
 
@@ -52,12 +56,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Apply CORS
+
 app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
-// Enable Swagger
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
