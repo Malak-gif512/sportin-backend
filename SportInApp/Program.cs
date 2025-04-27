@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SportInApp.Data;
 using SportInApp.Services;
@@ -20,6 +20,7 @@ builder.Services.AddCors(options =>
         });
 });
 
+// Add Email Service
 builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Add Swagger
@@ -45,25 +46,31 @@ else
     app.UseHsts();
 }
 
+// Force HTTPS
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
-// 🔥 هنا استخدمنا CORS بعد UseRouting
+// Apply CORS
 app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
-// Use Swagger
+// Enable Swagger
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "SportIn API V1");
 });
 
+// Default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// 🔥 Listen on the assigned port from Railway or fallback to 8080
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Urls.Add($"http://*:{port}");
 
 app.Run();
